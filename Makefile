@@ -46,6 +46,8 @@ BASEROM_FILES := $(wildcard baserom/*)
 BASEROM_FILES := $(subst baserom/dmadata ,,$(BASEROM_FILES))
 BASEROM_BUILD_FILES := $(BASEROM_FILES:baserom/%=build/baserom/%)
 BASEROM_PRE_DMADATA_FILES := $(BASEROM_BUILD_FILES:build/baserom/%=build/baserom_pre_dmadata/%)
+#QEMU_IRIX="/mnt/c/users/davfa/desktop/majora/tools/qemu-mips"
+#MIPS_BINUTILS_PREFIX=mips-linux-gnu-
 
 BASE_DECOMP_FILES := $(wildcard decomp/*)
 DECOMP_FILES := $(BASE_DECOMP_FILES:decomp/%=build/decomp/%)
@@ -170,7 +172,7 @@ build/decomp_pre_dmadata/ovl_Bg_Ikana_Ray: build/ovl_Bg_Ikana_Ray_pre_dmadata.bi
 disasm:
 	@./tools/disasm.py -d ./asm -e ./include -u . -l ./tables/files.py -f ./tables/functions.py -o ./tables/objects.py -v ./tables/variables.py -v ./tables/vrom_variables.py -v ./tables/pre_boot_variables.py
 	@while read -r file; do \
-		./tools/split_asm.py ./asm/$$file.asm ./asm/nonmatching/$$file; \
+	    echo $$file |	./tools/split_asm.py ./asm/$$file.asm ./asm/nonmatching/$$file; \
 	done < ./tables/files_with_nonmatching.txt
 
 # Recipes
@@ -184,20 +186,20 @@ build/baserom_pre_dmadata/%: baserom/%
 build/asm/%.o: asm/%.asm
 	$(AS) $(ASFLAGS) $^ -o $@
 
-build/src/actors/%.o: src/actors/%.c include/*
+build/src/actors/%.o: src/actors/%.c ./include/*
 	$(CC) -c $(CFLAGS) $(MIPS_VERSION) $(OPTIMIZATION) -Iinclude -o $@ $<
 	./tools/overlay.py $@ build/src/actors/$*_overlay.s
 	$(AS) $(ASFLAGS) build/src/actors/$*_overlay.s -o build/src/actors/$*_overlay.o
 
-build/src/%.o: src/%.c include/*
-	$(CC) -c $(CFLAGS) $(MIPS_VERSION) $(OPTIMIZATION) -Iinclude -o $@ $<
+build/src/%.o: src/%.c ./include/*
+	$(CC) -c $(CFLAGS) $(MIPS_VERSION) $(OPTIMIZATION) -I./include -o $@ $<
 
 build/src/libultra/libc/ll.o: src/libultra/libc/ll.c include/*
-	$(CC) -c $(CFLAGS) $(MIPS_VERSION) $(OPTIMIZATION) -Iinclude -o $@ $<
+	$(CC) -c $(CFLAGS) $(MIPS_VERSION) $(OPTIMIZATION) -I./include -o $@ $<
 	./tools/set_o32abi_bit.py $@
 
 build/src/libultra/libc/llcvt.o: src/libultra/libc/llcvt.c include/*
-	$(CC) -c $(CFLAGS) $(MIPS_VERSION) $(OPTIMIZATION) -Iinclude -o $@ $<
+	$(CC) -c $(CFLAGS) $(MIPS_VERSION) $(OPTIMIZATION) -I./include -o $@ $<
 	./tools/set_o32abi_bit.py $@
 
 build/decomp/%: build/decomp_pre_dmadata/%

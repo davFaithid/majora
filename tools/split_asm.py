@@ -12,8 +12,9 @@ if __name__ == '__main__':
     os.makedirs(args.output, exist_ok=True)
 
     file_names = []
-
-    with open(args.input, 'r') as f:
+    infile = str(args.input).replace("\r","")
+    print("processing", infile)
+    with open(infile, 'r') as f:
         current_file = None
         writing = False
         lines = f.readlines()
